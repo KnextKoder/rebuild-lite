@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import * as xml2js from 'xml2js';
 import Alert from './Alert';
+import SuccessAlert from './SuccessAlert';
 
 export const ArxivForm: React.FC = () => {
   const [url, setUrl] = useState<string>('');
@@ -10,6 +11,7 @@ export const ArxivForm: React.FC = () => {
   const [description, setDescription] = useState<string>('');
   const [attribution, setAttribution] = useState<string>('');
   const [showAlert, setShowAlert] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
 
 
@@ -35,39 +37,32 @@ export const ArxivForm: React.FC = () => {
       const text = await response.text();
       
       xml2js.parseString(text, (err: Error | null, result: any) => {
-        if (response.status !== 200) {
+        if(response.status === 200){
+
+          console.log("Article successfully fetched");
+          setShowSuccessAlert(true);
+
+          const authors = result.feed.entry[0].author;
+          let authorsList = "";
+          
+          // Loop through the Authors List and append author's names to authorsList
+          authors.forEach((author: any) => {
+            authorsList += author.name[0] + ", ";
+          });
+
+          const fetchedTitle = result.feed.entry[0].title[0];
+          const fetchedDescription = result.feed.entry[0].summary[0];
+          const fetchedAttribution = authorsList;
+          setTitle(fetchedTitle);
+          setDescription(fetchedDescription);
+          setAttribution(fetchedAttribution);
+
+
+        }else {
+
           console.error('Error parsing XML:', err);
           setShowAlert(true);
           
-        } else {
-          console.log('Fetching details for:', url);
-          console.log(result);
-          console.log(result.feed.entry[0].title[0]);
-          console.log(result.feed.entry[0].summary[0]);
-          const authors = result.feed.entry[0].author
-
-          //Loop through the Authors List
-          authors.forEach((author: any) => {
-            console.log(author.name[0]);
-          })
-
-
-          if (!err) {
-            const authors = result.feed.entry[0].author;
-            let authorsList = "";
-            
-            // Loop through the Authors List and append author's names to authorsList
-            authors.forEach((author: any) => {
-              authorsList += author.name[0] + ", ";
-            });
-  
-            const fetchedTitle = result.feed.entry[0].title[0];
-            const fetchedDescription = result.feed.entry[0].summary[0];
-            const fetchedAttribution = authorsList;
-            setTitle(fetchedTitle);
-            setDescription(fetchedDescription);
-            setAttribution(fetchedAttribution);
-          }
         }
 
       });
@@ -124,6 +119,15 @@ export const ArxivForm: React.FC = () => {
           <Alert 
             message="Article not found! Please check the URL and try again." 
             onClose={() => setShowAlert(false)} 
+          />
+        )}
+      </div>
+
+      <div>
+        {showSuccessAlert && (
+          <SuccessAlert 
+            message="Article Found 👍." 
+            onClose={() => setShowSuccessAlert(false)} 
           />
         )}
       </div>
