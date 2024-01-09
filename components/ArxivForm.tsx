@@ -28,6 +28,8 @@ export const ArxivForm: React.FC = () => {
   //Handle Form Submit function
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setShowSuccessAlert(false);
+    setShowAlert(false);
     try {
       // Fetch Paper Details
       const paperId = extractPaperId(url);
