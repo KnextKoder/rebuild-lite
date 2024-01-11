@@ -23,7 +23,8 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({ onFileSelect }) => 
                    file:rounded-full file:border-0
                    file:text-sm file:font-semibold
                    file:bg-violet-50 file:text-violet-700
-                   hover:file:bg-violet-100"
+                   hover:file:bg-violet-700
+                   hover:file:text-violet-100"
       />
     </div>
   );
