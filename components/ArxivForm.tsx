@@ -4,6 +4,8 @@ import { useState } from 'react';
 import * as xml2js from 'xml2js';
 import Alert from './Alert';
 import SuccessAlert from './SuccessAlert';
+import FileUploadButton from './FileUploadButton';
+
 
 export const ArxivForm: React.FC = () => {
   const [url, setUrl] = useState<string>('');
@@ -12,7 +14,7 @@ export const ArxivForm: React.FC = () => {
   const [attribution, setAttribution] = useState<string>('');
   const [showAlert, setShowAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
 
   //Parse Url i.e. input.value
@@ -76,13 +78,56 @@ export const ArxivForm: React.FC = () => {
 
   };
   
+
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    // Implement file validation if needed
+    console.log('Selected file:', file?.name);
+  };
+
+  const uploadFile = async () => {
+    if (!selectedFile) return;
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+  
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      // Handle response
+      if (response.ok) {
+        // Parse the response
+        const data = await response.json();
+        // Handle the data
+        console.log('Response data:', data);
+      } else {
+        // Handle the error
+        throw new Error('Failed to fetch data');
+      }
+      
+    } catch (error) {
+      // Handle error here
+    }
+  };
   ////////////////////////Handle File Upload
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Handle the file (upload or process it)
-      console.log(file.name); // Example action
+      console.log('Selected file:', file.name);
+      // You can now use the File API to read the file or upload it to a server.
+      // For example, you could create a new FormData object and append the file to it:
+      const formData = new FormData();
+      formData.append('file', file);
+      console.log('FormData:', formData);
+      // Then you could use fetch or another library to send the FormData to a server.
+    } else {
+      console.log('No file selected');
     }
   };
 
@@ -164,16 +209,17 @@ export const ArxivForm: React.FC = () => {
         <div className="flex mx-2 my-2 px-3 py-3 w-full justify-between">
 
           <div className="justify-start">
-            <input 
-              type="file"
-              accept="image/*,.pdf"
-              className="hidden"
-              id="fileInput"
-              onChange={handleFileChange}
-            />
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded" onClick={() => document.getElementById('fileInput')?.click()}>
+            <button
+              onClick={uploadFile}
+              className="mt-4 px-4 py-2 bg-indigo-700 text-white rounded hover:bg-blue-500"
+            >
               Upload Image/PDF
             </button>
+
+            <div>
+              <FileUploadButton onFileSelect={handleFileSelect} />
+              {/* {selectedFile?.name} */}
+            </div>
           </div>
           <div className="justify-end">
             <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded" onClick={submitPost}>
